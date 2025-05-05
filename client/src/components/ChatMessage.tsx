@@ -120,18 +120,64 @@ export function ChatMessage({ message }: ChatMessageProps) {
     }
   };
 
-  // Get regenerateLastResponse from ChatContext
-  const { regenerateLastResponse } = useChat();
-  
+  // We need to track which message is being regenerated
   const regenerateResponse = () => {
-    // Call the actual regenerate function from the context
-    regenerateLastResponse();
+    // Only allow regenerating if this is an assistant message
+    if (role !== 'assistant') return;
+    
+    // Find the user message that prompted this response
+    const userMessageIndex = findPrecedingUserMessageIndex();
+    
+    if (userMessageIndex === -1) {
+      toast({
+        title: "Error",
+        description: "Cannot find the user message that prompted this response",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    // Call regenerate for this specific message
+    regenerateSpecificResponse(userMessageIndex);
     
     toast({
       title: "Regenerating response",
       description: "Please wait while we get a new response",
       duration: 2000,
     });
+  };
+  
+  // Find the index of the user message that prompted this response
+  const findPrecedingUserMessageIndex = () => {
+    // Get all messages from the context
+    const { messages } = useChat();
+    
+    // Find this message's index
+    const currentIndex = messages.findIndex(m => 
+      m.timestamp === message.timestamp && 
+      m.role === message.role &&
+      m.content === message.content
+    );
+    
+    if (currentIndex <= 0) return -1;
+    
+    // Look for the most recent user message before this assistant message
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') {
+        return i;
+      }
+    }
+    
+    return -1;
+  };
+  
+  // Regenerate the response to a specific user message
+  const regenerateSpecificResponse = (userMessageIndex: number) => {
+    const { messages, regenerateResponseAtIndex } = useChat();
+    
+    // Call the context method to regenerate this specific response
+    regenerateResponseAtIndex(userMessageIndex);
   };
 
   const handleFeedback = (type: 'like' | 'dislike') => {
