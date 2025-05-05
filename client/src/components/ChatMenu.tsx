@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Menu, PlusCircle, MessageSquare, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChatHistory } from '@/context/ChatHistoryContext';
+import { Chat } from '@/types';
 
 export function ChatMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -65,7 +66,7 @@ export function ChatMenu() {
               {chats.length === 0 ? (
                 <p className="text-muted-foreground text-sm p-2">No conversations yet</p>
               ) : (
-                chats.map((chat) => (
+                chats.map((chat: Chat) => (
                   <button
                     key={chat.id}
                     onClick={() => handleChatSelect(chat.id)}

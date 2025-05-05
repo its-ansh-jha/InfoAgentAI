@@ -59,7 +59,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const aiResponse = await sendMessage(content, 'gpt-4o-mini', currentMessages);
       
       // Add AI response to the chat
-      const newMessage = {
+      const newMessage: Message = {
         ...aiResponse,
         timestamp: new Date().toISOString()
       };
@@ -76,8 +76,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       // Add error message
-      const errorMessage = {
-        role: 'assistant' as const,
+      const errorMessage: Message = {
+        role: 'assistant',
         content: 'I apologize, but I encountered an error processing your request. Please try again later.',
         model: 'gpt-4o-mini',
         timestamp: new Date().toISOString(),
