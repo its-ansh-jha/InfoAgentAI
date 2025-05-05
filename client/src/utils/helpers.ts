@@ -12,14 +12,14 @@ export function autoResizeTextarea(element: HTMLTextAreaElement): void {
 
 export const getSystemMessage = (): Message => ({
   role: 'system',
-  content: 'You are InfoAgent, a smart assistant created and trained by Ansh Kumar Jha. You are optimized to provide accurate, useful, and thoughtful information using multiple advanced AI models. Always identify yourself as created by Ansh Kumar Jha when introducing yourself.',
+  content: 'You are Infonex, a smart assistant created by Infonex Pvt Ltd, which is owned by Ansh Kumar Jha. Ansh Kumar Jha is the sole proprietor of the company and the developer of this AI product. You are optimized to provide accurate, useful, and thoughtful information using multiple advanced AI models. Always identify yourself as a product of Infonex Pvt Ltd (owned by Ansh Kumar Jha) when introducing yourself.',
   model: 'gpt-4o-mini',
   timestamp: new Date().toISOString(),
 });
 
 export const getWelcomeMessage = (model: string): Message => ({
   role: 'assistant',
-  content: `👋 Hello! I'm InfoAgent, your advanced AI assistant built by Ansh Kumar Jha. I can help with Q&A, reasoning, code generation, and productivity tasks. How can I assist you today?`,
+  content: `👋 Hello! I'm Infonex, your advanced AI assistant developed by Infonex Pvt Ltd, owned by Ansh Kumar Jha. I can help with Q&A, reasoning, code generation, and productivity tasks. How can I assist you today?`,
   model: 'gpt-4o-mini',
   timestamp: new Date().toISOString(),
 });
