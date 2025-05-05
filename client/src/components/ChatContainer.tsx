@@ -13,22 +13,26 @@ export function ChatContainer() {
   }, [messages]);
 
   return (
-    <main className="flex-grow container mx-auto px-4 py-6 overflow-auto">
-      <div className="max-w-3xl mx-auto space-y-6">
+    <main className="flex-grow container mx-auto px-4 py-6 overflow-auto bg-cyber-pattern">
+      <div className="max-w-3xl mx-auto space-y-6 relative">
+        {/* Decorative Elements */}
+        <div className="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-accent via-primary to-transparent opacity-50"></div>
+        <div className="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-accent via-primary to-transparent opacity-50"></div>
+        
         {messages.map((message, index) => (
           <ChatMessage key={index} message={message} />
         ))}
         
         {isLoading && (
           <div className="flex items-start space-x-3">
-            <div className="bg-primary rounded-full w-8 h-8 flex items-center justify-center text-white flex-shrink-0 mt-1">
+            <div className="bg-accent cyber-glow rounded-full w-8 h-8 flex items-center justify-center text-white flex-shrink-0 mt-1">
               <Loader2 className="h-4 w-4 animate-spin" />
             </div>
-            <div className="bg-white dark:bg-secondary rounded-2xl rounded-tl-none p-4 shadow-sm">
+            <div className="bg-white dark:bg-secondary rounded-2xl rounded-tl-none p-4 shadow-sm futuristic-border">
               <div className="flex space-x-2">
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse"></div>
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse delay-75"></div>
-                <div className="w-2 h-2 rounded-full bg-primary animate-pulse delay-150"></div>
+                <div className="w-2 h-2 rounded-full bg-accent animate-pulse"></div>
+                <div className="w-2 h-2 rounded-full bg-accent animate-pulse delay-75"></div>
+                <div className="w-2 h-2 rounded-full bg-accent animate-pulse delay-150"></div>
               </div>
             </div>
           </div>

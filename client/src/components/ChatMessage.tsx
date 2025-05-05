@@ -12,7 +12,11 @@ interface ChatMessageProps {
 export function ChatMessage({ message }: ChatMessageProps) {
   const { role, content } = message;
   const isUser = role === 'user';
-  const isSystem = content.startsWith('System:');
+  
+  // Skip rendering system messages completely
+  if (role === 'system') {
+    return null;
+  }
   
   // Split content into text, code blocks, and math blocks
   const contentParts = extractCodeBlocks(content);
@@ -26,39 +30,31 @@ export function ChatMessage({ message }: ChatMessageProps) {
       )}
       
       <div className={`${isUser 
-        ? 'bg-primary bg-opacity-10 dark:bg-primary-dark dark:bg-opacity-20 rounded-2xl rounded-tr-none' 
-        : 'bg-white dark:bg-secondary rounded-2xl rounded-tl-none'} 
-        p-4 max-w-[85%] shadow-sm`}
+        ? 'bg-primary bg-opacity-10 dark:bg-primary dark:bg-opacity-10 rounded-2xl rounded-tr-none border border-primary border-opacity-20' 
+        : 'bg-white dark:bg-secondary rounded-2xl rounded-tl-none border border-accent border-opacity-20'} 
+        p-4 max-w-[85%] shadow-md futuristic-border ${!isUser ? 'cyber-glow' : ''}`}
       >
-        {isSystem ? (
-          // System message
-          <p className="text-neutral-900 dark:text-white">
-            <span className="font-semibold">System:</span> You are InfoAgent, a smart assistant created and trained by Ansh Kumar Jha. You are optimized to provide accurate, useful, and thoughtful information using multiple advanced AI models.
-          </p>
-        ) : (
-          // Regular user or assistant message
-          <div className="text-neutral-900 dark:text-white">
-            {contentParts.map((part, index) => {
-              if (part.isCode) {
-                return <CodeBlock key={index} code={part.text} language={part.language} />;
-              } else if (part.isMath) {
-                return (
-                  <div key={index} className="my-4 overflow-x-auto">
-                    <MathDisplay math={part.text} isBlock={true} />
-                  </div>
-                );
-              } else if (part.isInlineMath) {
-                return (
-                  <span key={index} className="inline-block mx-1">
-                    <MathDisplay math={part.text} isBlock={false} />
-                  </span>
-                );
-              } else {
-                return <p key={index} className="whitespace-pre-line">{part.text}</p>;
-              }
-            })}
-          </div>
-        )}
+        <div className="text-neutral-900 dark:text-white">
+          {contentParts.map((part, index) => {
+            if (part.isCode) {
+              return <CodeBlock key={index} code={part.text} language={part.language} />;
+            } else if (part.isMath) {
+              return (
+                <div key={index} className="my-4 overflow-x-auto">
+                  <MathDisplay math={part.text} isBlock={true} />
+                </div>
+              );
+            } else if (part.isInlineMath) {
+              return (
+                <span key={index} className="inline-block mx-1">
+                  <MathDisplay math={part.text} isBlock={false} />
+                </span>
+              );
+            } else {
+              return <p key={index} className="whitespace-pre-line">{part.text}</p>;
+            }
+          })}
+        </div>
       </div>
       
       {isUser && (

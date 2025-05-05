@@ -16,10 +16,13 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  // Only add welcome message to UI messages, keep system message separate
   const [messages, setMessages] = useState<Message[]>([
-    getSystemMessage(),
     getWelcomeMessage('GPT-4o-mini')
   ]);
+  
+  // Store system message for API requests but don't display it
+  const systemMessage = getSystemMessage();
   const [model, setModel] = useState<ModelType>('gpt-4o-mini');
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
@@ -41,8 +44,8 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
 
     try {
-      // Get current messages at the time of sending - not from dependency array
-      const currentMessages = [...messages, userMessage];
+      // Get current messages at the time of sending, including system message for AI context
+      const currentMessages = [systemMessage, ...messages, userMessage];
       const aiResponse = await sendMessage(content, model, currentMessages);
       
       // Add AI response to the chat
@@ -78,7 +81,6 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const clearMessages = useCallback(() => {
     setMessages([
-      getSystemMessage(),
       getWelcomeMessage(model === 'gpt-4o-mini' ? 'GPT-4o-mini' : 'DeepSeek R1')
     ]);
   }, [model]);
