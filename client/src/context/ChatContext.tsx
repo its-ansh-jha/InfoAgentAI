@@ -9,6 +9,7 @@ interface ChatContextType {
   messages: Message[];
   isLoading: boolean;
   sendUserMessage: (content: string, imageFile?: File | null) => Promise<void>;
+  regenerateLastResponse: () => Promise<void>;
   clearMessages: () => void;
 }
 

@@ -36,13 +36,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Route to appropriate model
       if (chatRequest.model === "gpt-4o-mini") {
-        // Use Llama-4-Maverick model from OpenRouter instead
-        response = await generateMaverickResponse(chatRequest);
+        // Use OpenAI's GPT-4o-mini
+        response = await generateOpenAIResponse(chatRequest);
       } else if (chatRequest.model === "deepseek-r1") {
         response = await generateDeepSeekResponse(chatRequest);
       } else if (chatRequest.model === "llama-4-maverick") {
-        // Direct call to Llama-4-Maverick
-        response = await generateMaverickResponse(chatRequest);
+        // For now, redirect to GPT-4o-mini since we're not using Maverick
+        response = await generateOpenAIResponse(chatRequest);
       } else {
         return res.status(400).json({ message: "Invalid model selection" });
       }

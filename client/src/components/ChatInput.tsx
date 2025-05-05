@@ -73,10 +73,12 @@ export function ChatInput() {
   };
   
   const handleImageUpload = () => {
-    // Trigger the hidden file input
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
-    }
+    // Show "coming soon" message instead of opening file picker
+    toast({
+      title: "Image upload",
+      description: "Image upload feature coming soon!",
+      duration: 2000,
+    });
   };
   
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -229,7 +231,7 @@ export function ChatInput() {
           </div>
           
           <div className="text-center mt-1 text-xs text-neutral-500">
-            InfoAgent is using Llama-4-Maverick to generate human-like text
+            InfoAgent is using GPT-4o-mini to generate human-like text
           </div>
         </form>
       </div>
