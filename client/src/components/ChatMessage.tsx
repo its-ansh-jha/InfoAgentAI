@@ -15,6 +15,7 @@ import { CodeBlock } from '@/components/CodeBlock';
 import { MathDisplay } from '@/components/MathDisplay';
 import { extractCodeBlocks } from '@/utils/helpers';
 import { useToast } from '@/hooks/use-toast';
+import { useChat } from '@/context/ChatContext';
 import { 
   Tooltip, 
   TooltipContent, 
@@ -89,8 +90,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
     
     // Clean up text for better speech synthesis
     const cleanedText = textContent
-      // Replace emojis with spaces to prevent reading emoji codes
-      .replace(/[\u{1F600}-\u{1F64F}|\u{1F300}-\u{1F5FF}|\u{1F680}-\u{1F6FF}|\u{1F700}-\u{1F77F}|\u{1F780}-\u{1F7FF}|\u{1F800}-\u{1F8FF}|\u{1F900}-\u{1F9FF}|\u{1FA00}-\u{1FA6F}|\u{1FA70}-\u{1FAFF}|\u{2600}-\u{26FF}|\u{2700}-\u{27BF}]/gu, ' ')
+      // Replace common emoji patterns with spaces to prevent reading emoji codes
+      .replace(/:[a-z_]+:/g, ' ')
       // Remove special characters and brackets that might be read literally
       .replace(/[*_~`#|<>{}[\]()]/g, ' ')
       // Normalize whitespace
@@ -119,8 +120,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
     }
   };
 
+  // Get regenerateLastResponse from ChatContext
+  const { regenerateLastResponse } = useChat();
+  
   const regenerateResponse = () => {
-    // This would be hooked up to your chat context to regenerate the response
+    // Call the actual regenerate function from the context
+    regenerateLastResponse();
+    
     toast({
       title: "Regenerating response",
       description: "Please wait while we get a new response",

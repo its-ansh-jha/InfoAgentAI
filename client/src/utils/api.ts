@@ -32,7 +32,7 @@ export async function uploadImage(file: File): Promise<string> {
 export async function sendMessageWithImage(
   content: string,
   imageData: string | null,
-  model: 'llama-4-maverick',
+  model: 'gpt-4o-mini' | 'llama-4-maverick',
   messages: Message[]
 ): Promise<Message> {
   try {
@@ -96,16 +96,14 @@ export async function sendMessage(
   messages: Message[]
 ): Promise<Message> {
   try {
-    // Redirect to Llama-4-Maverick model (replaces gpt-4o-mini as per requirements)
-    const actualModel = 'llama-4-maverick';
-    
+    // Use the model parameter directly (GPT-4o-mini as requested)
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: actualModel,
+        model: model,
         messages: messages.map(({ role, content }) => ({ role, content })),
       }),
     });
@@ -120,7 +118,7 @@ export async function sendMessage(
     return {
       role: data.message.role,
       content: data.message.content,
-      model: actualModel,
+      model: model,
       timestamp: new Date().toISOString(),
     };
   } catch (error) {

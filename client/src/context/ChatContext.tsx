@@ -68,7 +68,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userMessage: Message = {
       role: 'user',
       content: messageContent,
-      model: 'llama-4-maverick',
+      model: 'gpt-4o-mini',
       timestamp: new Date().toISOString(),
     };
 
@@ -91,14 +91,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
         aiResponse = await sendMessageWithImage(
           content, 
           imageData, 
-          'llama-4-maverick', 
+          'gpt-4o-mini', 
           currentMessages
         );
       } else {
         // Use regular text API call
         aiResponse = await sendMessage(
           content, 
-          'llama-4-maverick', 
+          'gpt-4o-mini', 
           currentMessages
         );
       }
@@ -124,11 +124,87 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const errorMessage: Message = {
         role: 'assistant',
         content: 'I apologize, but I encountered an error processing your request. Please try again later.',
-        model: 'llama-4-maverick',
+        model: 'gpt-4o-mini',
         timestamp: new Date().toISOString(),
       };
       
       const finalMessages = [...updatedMessages, errorMessage];
+      setMessages(finalMessages);
+      updateCurrentChat(finalMessages);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [messages, toast, updateCurrentChat, systemMessage]);
+
+  // Function to regenerate the last AI response
+  const regenerateLastResponse = useCallback(async () => {
+    // We need at least a user message to regenerate a response
+    if (messages.length < 1) return;
+    
+    // Find the last user message
+    const lastUserMessageIndex = [...messages].reverse().findIndex(m => m.role === 'user');
+    if (lastUserMessageIndex === -1) return;
+    
+    // Get the actual index in the original array
+    const userMessageIndex = messages.length - 1 - lastUserMessageIndex;
+    const userMessage = messages[userMessageIndex];
+    
+    // Remove the last AI response and any subsequent messages
+    const messagesUpToUserMessage = messages.slice(0, userMessageIndex + 1);
+    setMessages(messagesUpToUserMessage);
+    updateCurrentChat(messagesUpToUserMessage);
+    
+    // Show loading state
+    setIsLoading(true);
+    
+    try {
+      // Get all messages up to the user message, including system message for context
+      const currentMessages = [systemMessage, ...messagesUpToUserMessage];
+      
+      // Extract content from user message
+      const content = typeof userMessage.content === 'string' 
+        ? userMessage.content 
+        : 'Could not retrieve message content';
+      
+      // Call the API to regenerate the response
+      const aiResponse = await sendMessage(
+        content,
+        'gpt-4o-mini',
+        currentMessages
+      );
+      
+      // Add the new AI response to the chat
+      const newMessage: Message = {
+        ...aiResponse,
+        timestamp: new Date().toISOString()
+      };
+      
+      const finalMessages = [...messagesUpToUserMessage, newMessage];
+      setMessages(finalMessages);
+      updateCurrentChat(finalMessages);
+      
+      toast({
+        title: 'Response regenerated',
+        description: 'A new AI response has been generated',
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Failed to regenerate AI response:', error);
+      toast({
+        title: 'Error',
+        description: error instanceof Error ? error.message : 'Failed to regenerate the AI response',
+        variant: 'destructive',
+      });
+      
+      // Add error message
+      const errorMessage: Message = {
+        role: 'assistant',
+        content: 'I apologize, but I encountered an error generating a new response. Please try again later.',
+        model: 'gpt-4o-mini',
+        timestamp: new Date().toISOString(),
+      };
+      
+      const finalMessages = [...messagesUpToUserMessage, errorMessage];
       setMessages(finalMessages);
       updateCurrentChat(finalMessages);
     } finally {
@@ -146,6 +222,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       messages, 
       isLoading, 
       sendUserMessage,
+      regenerateLastResponse,
       clearMessages 
     }}>
       {children}
