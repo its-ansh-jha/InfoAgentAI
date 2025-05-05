@@ -62,19 +62,100 @@ export function ChatInput() {
     }
   };
   
+  // Add real-time search as user types
+  useEffect(() => {
+    const performRealTimeSearch = async () => {
+      // Only search if input is meaningful
+      if (input.trim().length < 3 || isLoading) {
+        setSearchResults([]);
+        setIsSearching(false);
+        return;
+      }
+      
+      // Perform search
+      setIsSearching(true);
+      try {
+        const results = await performSearch(input);
+        setSearchResults(results);
+      } catch (error) {
+        console.error('Search error:', error);
+        setSearchResults([]);
+      } finally {
+        setIsSearching(false);
+      }
+    };
+    
+    // Debounce search to avoid excessive API calls
+    const debounceTimer = setTimeout(performRealTimeSearch, 500);
+    return () => clearTimeout(debounceTimer);
+  }, [input, isLoading]);
+
+  // Handle voice input
   const handleVoiceInput = () => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      toast({
-        title: "Voice input",
-        description: "Voice input feature coming soon!",
-        duration: 2000,
-      });
-    } else {
+    if (isListening) {
+      // Stop listening if already active
+      setIsListening(false);
+      return;
+    }
+    
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
       toast({
         title: "Error",
         description: "Speech recognition is not supported in your browser",
         variant: "destructive",
         duration: 3000,
+      });
+      return;
+    }
+    
+    // Create a new SpeechRecognition instance
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = false;
+    recognition.interimResults = true;
+    recognition.lang = 'en-US';
+    
+    // Handle recognition results
+    recognition.onresult = (event) => {
+      const transcript = Array.from(event.results)
+        .map(result => result[0].transcript)
+        .join('');
+      
+      setInput(prevInput => prevInput + ' ' + transcript);
+    };
+    
+    // Handle end of recognition
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+    
+    // Handle errors
+    recognition.onerror = (event: any) => {
+      console.error('Speech recognition error:', event.error);
+      setIsListening(false);
+      toast({
+        title: "Voice Input Error",
+        description: `Error: ${event.error || 'Unknown error'}. Please try again.`,
+        variant: 'destructive',
+      });
+    };
+    
+    // Start recognition
+    try {
+      recognition.start();
+      setIsListening(true);
+      toast({
+        title: "Voice Input Active",
+        description: "Speak now... Your voice will be transcribed",
+        duration: 2000,
+      });
+    } catch (error) {
+      console.error('Error starting speech recognition:', error);
+      toast({
+        title: "Voice Input Error",
+        description: "Could not start voice recognition",
+        variant: 'destructive',
       });
     }
   };
@@ -140,6 +221,13 @@ export function ChatInput() {
   return (
     <footer className="sticky bottom-0 py-4 bg-neutral-900">
       <div className="container mx-auto px-4">
+        {/* Display search results above the input when there are results */}
+        {searchResults.length > 0 && !isLoading && (
+          <div className="max-w-3xl mx-auto mb-3">
+            <SearchResults results={searchResults} isLoading={isSearching} />
+          </div>
+        )}
+        
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
           {/* Hidden file input for image upload */}
           <input 
@@ -174,26 +262,33 @@ export function ChatInput() {
           
           <div className="relative flex items-center bg-neutral-800 rounded-full border border-neutral-700 overflow-hidden">
             <div className="flex items-center pl-3 space-x-1">
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      onClick={handleImageUpload}
-                      className={`h-9 w-9 rounded-full hover:bg-neutral-700 ${
-                        imageFile ? 'text-primary hover:text-primary' : 'text-neutral-400 hover:text-white'
-                      }`}
-                    >
-                      <ImagePlus className="h-5 w-5" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="top">
-                    <p>Upload image</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              {/* Show search icon when searching */}
+              {isSearching ? (
+                <div className="h-9 w-9 flex items-center justify-center">
+                  <Search className="h-5 w-5 text-neutral-400 animate-pulse" />
+                </div>
+              ) : (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleImageUpload}
+                        className={`h-9 w-9 rounded-full hover:bg-neutral-700 ${
+                          imageFile ? 'text-primary hover:text-primary' : 'text-neutral-400 hover:text-white'
+                        }`}
+                      >
+                        <ImagePlus className="h-5 w-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent side="top">
+                      <p>Upload image</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
             
             <textarea
@@ -216,13 +311,15 @@ export function ChatInput() {
                       variant="ghost"
                       size="icon"
                       onClick={handleVoiceInput}
-                      className="h-9 w-9 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-700"
+                      className={`h-9 w-9 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-700 ${
+                        isListening ? 'bg-red-500/20 text-red-400 animate-pulse' : ''
+                      }`}
                     >
                       <Mic className="h-5 w-5" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent side="top">
-                    <p>Voice input</p>
+                    <p>{isListening ? 'Stop recording' : 'Voice input'}</p>
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
@@ -237,8 +334,16 @@ export function ChatInput() {
             </div>
           </div>
           
-          <div className="text-center mt-1 text-xs text-neutral-500">
-            InfoAgent is using GPT-4o-mini to generate human-like text
+          <div className="flex justify-between items-center mt-1">
+            <div className="text-xs text-neutral-500">
+              {isListening && <span className="text-red-400">Listening...</span>}
+            </div>
+            <div className="text-xs text-neutral-500 text-center flex-1">
+              InfoAgent is using GPT-4o-mini to generate human-like text
+            </div>
+            <div className="text-xs text-neutral-500">
+              {searchResults.length > 0 && <span className="text-blue-400">{searchResults.length} search results</span>}
+            </div>
           </div>
         </form>
       </div>

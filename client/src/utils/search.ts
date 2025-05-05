@@ -12,14 +12,22 @@ interface SearchResponse {
 }
 
 export async function performSearch(query: string): Promise<SearchResult[]> {
+  if (!query || query.trim().length < 3) {
+    return [];
+  }
+  
   try {
     const encodedQuery = encodeURIComponent(query);
-    const response = await apiRequest({
+    const response = await apiRequest<SearchResponse>({
       url: `/api/search?query=${encodedQuery}`,
       method: 'GET',
-    }) as SearchResponse;
+    });
     
-    return response.results || [];
+    if (!response || !response.results) {
+      return [];
+    }
+    
+    return response.results;
   } catch (error) {
     console.error('Search error:', error);
     return [];
