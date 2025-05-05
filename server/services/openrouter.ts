@@ -18,8 +18,8 @@ export async function generateDeepSeekResponse(
       method: "POST",
       headers: {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-        "HTTP-Referer": process.env.REPLIT_DOMAINS?.split(",")[0] || "https://infoagent.replit.app",
-        "X-Title": "InfoAgent by Ansh Kumar Jha",
+        "HTTP-Referer": process.env.REPLIT_DOMAINS?.split(",")[0] || "https://infonex.replit.app",
+        "X-Title": "Infonex by Infonex Pvt Ltd",
         "Content-Type": "application/json"
       },
       body: JSON.stringify({

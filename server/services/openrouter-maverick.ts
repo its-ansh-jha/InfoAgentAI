@@ -70,8 +70,8 @@ export async function generateMaverickResponse(
       headers: {
         'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://replit.com', 
-        'X-Title': 'InfoAgent'
+        'HTTP-Referer': process.env.REPLIT_DOMAINS?.split(",")[0] || 'https://infonex.replit.app', 
+        'X-Title': 'Infonex by Infonex Pvt Ltd'
       },
       body: JSON.stringify({
         model: MODEL,
