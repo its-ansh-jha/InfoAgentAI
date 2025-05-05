@@ -1,4 +1,5 @@
 import { Message } from '@/types';
+import { apiRequest } from '@/lib/queryClient';
 
 export interface ImageData {
   type: 'image';
@@ -60,26 +61,21 @@ export async function sendMessageWithImage(
       content: messageContent
     };
     
-    const response = await fetch('/api/chat', {
+    // Use the improved apiRequest function
+    const data = await apiRequest<{
+      message: { role: 'user' | 'assistant' | 'system'; content: string };
+      model: string;
+    }>({
+      url: '/api/chat',
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+      data: {
         model: model,
         messages: [...apiMessages, newMessage],
-      }),
+      },
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Error communicating with API');
-    }
-
-    const data = await response.json();
     
     return {
-      role: data.message.role,
+      role: data.message.role as 'user' | 'assistant' | 'system',
       content: data.message.content,
       model,
       timestamp: new Date().toISOString(),
@@ -96,27 +92,21 @@ export async function sendMessage(
   messages: Message[]
 ): Promise<Message> {
   try {
-    // Use the model parameter directly (GPT-4o-mini as requested)
-    const response = await fetch('/api/chat', {
+    // Use the improved apiRequest function
+    const data = await apiRequest<{
+      message: { role: 'user' | 'assistant' | 'system'; content: string };
+      model: string;
+    }>({
+      url: '/api/chat',
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
+      data: {
         model: model,
         messages: messages.map(({ role, content }) => ({ role, content })),
-      }),
+      },
     });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || 'Error communicating with API');
-    }
-
-    const data = await response.json();
     
     return {
-      role: data.message.role,
+      role: data.message.role as 'user' | 'assistant' | 'system',
       content: data.message.content,
       model: model,
       timestamp: new Date().toISOString(),
