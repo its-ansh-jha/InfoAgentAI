@@ -14,7 +14,8 @@ export function ChatContainer() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
   
-  // Update chat history when messages change
+  // Update chat history in the background when messages change
+  // This stores conversation context even though we don't show it to the user
   useEffect(() => {
     // Only update if there are messages to save
     if (messages.length > 0) {

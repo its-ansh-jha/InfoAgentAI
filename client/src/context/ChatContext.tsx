@@ -214,7 +214,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, [messages, toast, updateCurrentChat, systemMessage]);
 
   const clearMessages = useCallback(() => {
-    // Create a new chat instead of clearing messages
+    // Reset messages but keep chat history in the background
+    setMessages([]);
+    // The new chat gets created in the ChatHistoryContext
     startNewChat();
   }, [startNewChat]);
 
