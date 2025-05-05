@@ -27,7 +27,7 @@ export function Header() {
     <header className="sticky top-0 z-10 bg-neutral-900 border-b border-neutral-800">
       <div className="container mx-auto px-4 py-3 flex justify-between items-center">
         <div className="flex items-center gap-2">
-          <img src={logoImage} alt="Infonex Logo" className="h-9 w-9" />
+          <img src={logoImage} alt="Infonex Logo" className="h-9 w-9 rounded-full overflow-hidden object-cover" />
           <h1 className="font-bold text-xl text-white">
             Infonex
           </h1>

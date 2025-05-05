@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Message } from '@/types';
 import { 
-  Bot, 
   User, 
   ThumbsUp, 
   ThumbsDown, 
@@ -10,6 +9,7 @@ import {
   Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import logoImage from '../assets/logo.webp';
 import { CodeBlock } from '@/components/CodeBlock';
 import { MathDisplay } from '@/components/MathDisplay';
 import { TextToSpeech } from '@/components/TextToSpeech';
@@ -167,8 +167,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={`flex items-start ${isUser ? 'justify-end space-x-3' : 'space-x-3'} mb-6`}>
       {!isUser && (
-        <div className="bg-primary bg-opacity-80 rounded-full w-8 h-8 flex items-center justify-center text-white flex-shrink-0 mt-1 soft-glow">
-          <Bot className="h-4 w-4" />
+        <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 mt-1 soft-glow">
+          <img src={logoImage} alt="Infonex Logo" className="w-full h-full object-cover" />
         </div>
       )}
       

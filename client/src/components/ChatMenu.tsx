@@ -124,7 +124,7 @@ export function ChatMenu() {
               {/* Footer */}
               <div className="p-4 border-t border-neutral-800">
                 <div className="text-xs text-neutral-500 text-center">
-                  InfoAgent by Ansh Kumar Jha
+                  Infonex by Infonex Pvt Ltd
                 </div>
               </div>
             </div>
