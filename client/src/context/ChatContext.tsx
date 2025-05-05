@@ -41,7 +41,9 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
 
     try {
-      const aiResponse = await sendMessage(content, model, messages);
+      // Get current messages at the time of sending - not from dependency array
+      const currentMessages = [...messages, userMessage];
+      const aiResponse = await sendMessage(content, model, currentMessages);
       
       // Add AI response to the chat
       setMessages(prev => [
@@ -72,7 +74,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } finally {
       setIsLoading(false);
     }
-  }, [model, messages, toast]);
+  }, [model, toast]);
 
   const clearMessages = useCallback(() => {
     setMessages([
