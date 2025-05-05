@@ -4,9 +4,20 @@ import { z } from "zod";
 import { chatCompletionRequestSchema } from "@shared/schema";
 import { generateOpenAIResponse } from "./services/openai";
 import { generateDeepSeekResponse } from "./services/openrouter";
+import { generateMaverickResponse, handleImageUpload } from "./services/openrouter-maverick";
 import { log } from "./vite";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Image upload endpoint
+  app.post("/api/upload-image", async (req, res) => {
+    try {
+      await handleImageUpload(req, res);
+    } catch (error: any) {
+      log(`Error in image upload endpoint: ${error.message}`, "error");
+      return res.status(500).json({ message: error.message || "Error processing image" });
+    }
+  });
+  
   // Chat completion endpoint
   app.post("/api/chat", async (req, res) => {
     try {
@@ -25,17 +36,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Route to appropriate model
       if (chatRequest.model === "gpt-4o-mini") {
-        response = await generateOpenAIResponse(chatRequest);
+        // Use Llama-4-Maverick model from OpenRouter instead
+        response = await generateMaverickResponse(chatRequest);
       } else if (chatRequest.model === "deepseek-r1") {
         response = await generateDeepSeekResponse(chatRequest);
+      } else if (chatRequest.model === "llama-4-maverick") {
+        // Direct call to Llama-4-Maverick
+        response = await generateMaverickResponse(chatRequest);
       } else {
         return res.status(400).json({ message: "Invalid model selection" });
       }
       
-      log(`Model ${chatRequest.model} response: ${response.message.content.substring(0, 50)}...`);
+      // Log the response for debugging
+      let previewContent = 'Complex content structure';
       
-      // Return the response
-      return res.status(200).json(response);
+      if (response.content && typeof response.content === 'string') {
+        previewContent = response.content.substring(0, 50);
+      } else if (response.message && typeof response.message.content === 'string') {
+        previewContent = response.message.content.substring(0, 50);
+      }
+      
+      log(`Model ${chatRequest.model} response: ${previewContent}...`);
+      
+      // Return the response with compatibility for message format
+      return res.status(200).json({
+        message: response
+      });
     } catch (error: any) {
       log(`Error in chat endpoint: ${error.message}`, "error");
       return res.status(500).json({ message: error.message || "Something went wrong" });

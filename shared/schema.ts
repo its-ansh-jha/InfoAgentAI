@@ -37,13 +37,28 @@ export const insertMessageSchema = createInsertSchema(messages).pick({
 export type InsertMessage = z.infer<typeof insertMessageSchema>;
 export type Message = typeof messages.$inferSelect;
 
+// Define the image content type schema
+const imageContentSchema = z.object({
+  type: z.literal("image"),
+  image_data: z.string(), // Base64 encoded image data
+});
+
+// Define the text content type schema
+const textContentSchema = z.object({
+  type: z.literal("text"),
+  text: z.string(),
+});
+
 // Request schema for chat completions
 export const chatCompletionRequestSchema = z.object({
-  model: z.enum(["gpt-4o-mini", "deepseek-r1"]),
+  model: z.enum(["gpt-4o-mini", "deepseek-r1", "llama-4-maverick"]),
   messages: z.array(
     z.object({
       role: z.enum(["user", "assistant", "system"]),
-      content: z.string(),
+      content: z.union([
+        z.string(),
+        z.array(z.union([textContentSchema, imageContentSchema]))
+      ]),
     })
   ),
   sessionId: z.string().optional(),
@@ -57,7 +72,7 @@ export const chatCompletionResponseSchema = z.object({
     role: z.enum(["assistant"]),
     content: z.string(),
   }),
-  model: z.enum(["gpt-4o-mini", "deepseek-r1"]),
+  model: z.enum(["gpt-4o-mini", "deepseek-r1", "llama-4-maverick"]),
 });
 
 export type ChatCompletionResponse = z.infer<typeof chatCompletionResponseSchema>;
