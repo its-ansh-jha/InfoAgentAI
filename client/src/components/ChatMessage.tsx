@@ -120,13 +120,40 @@ export function ChatMessage({ message }: ChatMessageProps) {
     }
   };
 
-  // We need to track which message is being regenerated
+  // Get all we need from context at component level
+  const { messages, regenerateResponseAtIndex } = useChat();
+  
+  // Handle regenerate response click
   const regenerateResponse = () => {
     // Only allow regenerating if this is an assistant message
     if (role !== 'assistant') return;
     
-    // Find the user message that prompted this response
-    const userMessageIndex = findPrecedingUserMessageIndex();
+    // Find this message's index in the context messages
+    const currentIndex = messages.findIndex(m => 
+      m.timestamp === message.timestamp && 
+      m.role === message.role &&
+      (typeof m.content === 'string' && typeof content === 'string' ? 
+        m.content === content : JSON.stringify(m.content) === JSON.stringify(content))
+    );
+    
+    if (currentIndex <= 0) {
+      toast({
+        title: "Error",
+        description: "Cannot find this message in the conversation",
+        variant: "destructive",
+        duration: 3000,
+      });
+      return;
+    }
+    
+    // Look for the most recent user message before this assistant message
+    let userMessageIndex = -1;
+    for (let i = currentIndex - 1; i >= 0; i--) {
+      if (messages[i].role === 'user') {
+        userMessageIndex = i;
+        break;
+      }
+    }
     
     if (userMessageIndex === -1) {
       toast({
@@ -138,46 +165,14 @@ export function ChatMessage({ message }: ChatMessageProps) {
       return;
     }
     
-    // Call regenerate for this specific message
-    regenerateSpecificResponse(userMessageIndex);
+    // Call the regenerate function with the found index
+    regenerateResponseAtIndex(userMessageIndex);
     
     toast({
       title: "Regenerating response",
       description: "Please wait while we get a new response",
       duration: 2000,
     });
-  };
-  
-  // Find the index of the user message that prompted this response
-  const findPrecedingUserMessageIndex = () => {
-    // Get all messages from the context
-    const { messages } = useChat();
-    
-    // Find this message's index
-    const currentIndex = messages.findIndex(m => 
-      m.timestamp === message.timestamp && 
-      m.role === message.role &&
-      m.content === message.content
-    );
-    
-    if (currentIndex <= 0) return -1;
-    
-    // Look for the most recent user message before this assistant message
-    for (let i = currentIndex - 1; i >= 0; i--) {
-      if (messages[i].role === 'user') {
-        return i;
-      }
-    }
-    
-    return -1;
-  };
-  
-  // Regenerate the response to a specific user message
-  const regenerateSpecificResponse = (userMessageIndex: number) => {
-    const { messages, regenerateResponseAtIndex } = useChat();
-    
-    // Call the context method to regenerate this specific response
-    regenerateResponseAtIndex(userMessageIndex);
   };
 
   const handleFeedback = (type: 'like' | 'dislike') => {
