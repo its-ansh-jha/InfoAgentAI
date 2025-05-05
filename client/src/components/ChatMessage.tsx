@@ -24,17 +24,16 @@ export function ChatMessage({ message }: ChatMessageProps) {
   return (
     <div className={`flex items-start ${isUser ? 'justify-end space-x-3' : 'space-x-3'}`}>
       {!isUser && (
-        <div className="bg-primary rounded-full w-8 h-8 flex items-center justify-center text-white flex-shrink-0 mt-1">
+        <div className="bg-primary bg-opacity-80 rounded-full w-8 h-8 flex items-center justify-center text-white flex-shrink-0 mt-1 soft-glow">
           <Bot className="h-4 w-4" />
         </div>
       )}
       
       <div className={`${isUser 
-        ? 'bg-primary bg-opacity-10 dark:bg-primary dark:bg-opacity-10 rounded-2xl rounded-tr-none border border-primary border-opacity-20' 
-        : 'bg-white dark:bg-secondary rounded-2xl rounded-tl-none border border-accent border-opacity-20'} 
-        p-4 max-w-[85%] shadow-md futuristic-border ${!isUser ? 'cyber-glow' : ''}`}
+        ? 'bg-muted rounded-lg accent-border p-4 max-w-[85%] shadow-md' 
+        : 'bg-secondary rounded-lg p-4 max-w-[85%] shadow-md professional-border'}`}
       >
-        <div className="text-neutral-900 dark:text-white">
+        <div className="text-foreground">
           {contentParts.map((part, index) => {
             if (part.isCode) {
               return <CodeBlock key={index} code={part.text} language={part.language} />;
@@ -58,7 +57,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       </div>
       
       {isUser && (
-        <div className="bg-neutral-300 dark:bg-neutral-700 rounded-full w-8 h-8 flex items-center justify-center text-neutral-700 dark:text-neutral-200 flex-shrink-0 mt-1">
+        <div className="bg-muted rounded-full w-8 h-8 flex items-center justify-center text-muted-foreground flex-shrink-0 mt-1">
           <User className="h-4 w-4" />
         </div>
       )}

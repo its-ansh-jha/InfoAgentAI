@@ -37,9 +37,9 @@ export function ChatInput() {
   };
 
   return (
-    <footer className="sticky bottom-0 border-t border-neutral-300 dark:border-secondary-light bg-white dark:bg-secondary py-4">
-      <div className="container mx-auto px-4">
-        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex items-end gap-2">
+    <footer className="sticky bottom-0 border-t border-neutral-800 bg-background dark-glass py-4">
+      <div className="container mx-auto px-6">
+        <form onSubmit={handleSubmit} className="max-w-3xl mx-auto flex items-end gap-3">
           <div className="flex-grow relative">
             <textarea
               ref={textareaRef}
@@ -48,12 +48,12 @@ export function ChatInput() {
               onKeyDown={handleKeyDown}
               rows={1}
               placeholder="Type your message here..."
-              className="w-full border border-neutral-300 dark:border-secondary-light rounded-xl py-3 px-4 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white dark:bg-secondary-dark text-neutral-900 dark:text-white resize-none"
+              className="w-full border border-muted rounded-md py-3 px-4 focus:outline-none focus:ring-1 focus:ring-primary focus:border-primary bg-secondary text-foreground resize-none professional-border"
               disabled={isLoading}
             />
-            <div className="absolute bottom-2 right-2 text-xs text-neutral-400 dark:text-neutral-500">
+            <div className="absolute bottom-2 right-3 text-xs text-muted-foreground">
               <span>Using </span>
-              <span className="font-semibold text-primary">
+              <span className="font-medium text-primary">
                 {model === 'gpt-4o-mini' ? 'GPT-4o-mini' : 'DeepSeek R1'}
               </span>
             </div>
@@ -61,7 +61,7 @@ export function ChatInput() {
           <Button
             type="submit"
             disabled={isLoading || !input.trim()}
-            className="bg-primary hover:bg-primary-dark text-white p-3 rounded-xl transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="bg-primary hover:bg-primary/90 text-white p-3 rounded-md transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <SendHorizonal className="h-5 w-5" />
           </Button>
