@@ -1,16 +1,26 @@
 import React, { useEffect, useRef } from 'react';
 import { ChatMessage } from '@/components/ChatMessage';
 import { useChat } from '@/context/ChatContext';
+import { useChatHistory } from '@/context/ChatHistoryContext';
 import { Loader2 } from 'lucide-react';
 
 export function ChatContainer() {
   const { messages, isLoading } = useChat();
+  const { updateCurrentChat } = useChatHistory();
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   // Scroll to bottom when messages change
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
+  
+  // Update chat history when messages change
+  useEffect(() => {
+    // Only update if there are messages to save
+    if (messages.length > 0) {
+      updateCurrentChat(messages);
+    }
+  }, [messages, updateCurrentChat]);
 
   return (
     <main className="flex-grow container mx-auto px-4 py-6 overflow-auto bg-background subtle-grid">
