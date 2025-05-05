@@ -5,6 +5,7 @@ import { chatCompletionRequestSchema } from "@shared/schema";
 import { generateOpenAIResponse } from "./services/openai";
 import { generateDeepSeekResponse } from "./services/openrouter";
 import { generateMaverickResponse, handleImageUpload } from "./services/openrouter-maverick";
+import { handleSearch } from "./services/search";
 import { log } from "./vite";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -97,6 +98,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error: any) {
       log(`Error in chat endpoint: ${error.message}`, "error");
       return res.status(500).json({ message: error.message || "Something went wrong" });
+    }
+  });
+
+  // Search endpoint
+  app.get("/api/search", async (req, res) => {
+    try {
+      await handleSearch(req, res);
+    } catch (error: any) {
+      log(`Error in search endpoint: ${error.message}`, "error");
+      return res.status(500).json({ message: error.message || "Error performing search" });
     }
   });
 
