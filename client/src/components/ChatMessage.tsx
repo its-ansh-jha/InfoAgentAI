@@ -2,6 +2,7 @@ import React from 'react';
 import { Message } from '@/types';
 import { Bot, User } from 'lucide-react';
 import { CodeBlock } from '@/components/CodeBlock';
+import { MathDisplay } from '@/components/MathDisplay';
 import { extractCodeBlocks } from '@/utils/helpers';
 
 interface ChatMessageProps {
@@ -13,7 +14,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = role === 'user';
   const isSystem = content.startsWith('System:');
   
-  // Split content into text and code blocks
+  // Split content into text, code blocks, and math blocks
   const contentParts = extractCodeBlocks(content);
 
   return (
@@ -37,13 +38,25 @@ export function ChatMessage({ message }: ChatMessageProps) {
         ) : (
           // Regular user or assistant message
           <div className="text-neutral-900 dark:text-white">
-            {contentParts.map((part, index) => (
-              part.isCode ? (
-                <CodeBlock key={index} code={part.text} language={part.language} />
-              ) : (
-                <p key={index} className="whitespace-pre-line">{part.text}</p>
-              )
-            ))}
+            {contentParts.map((part, index) => {
+              if (part.isCode) {
+                return <CodeBlock key={index} code={part.text} language={part.language} />;
+              } else if (part.isMath) {
+                return (
+                  <div key={index} className="my-4 overflow-x-auto">
+                    <MathDisplay math={part.text} isBlock={true} />
+                  </div>
+                );
+              } else if (part.isInlineMath) {
+                return (
+                  <span key={index} className="inline-block mx-1">
+                    <MathDisplay math={part.text} isBlock={false} />
+                  </span>
+                );
+              } else {
+                return <p key={index} className="whitespace-pre-line">{part.text}</p>;
+              }
+            })}
           </div>
         )}
       </div>

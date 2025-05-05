@@ -33,10 +33,13 @@ export function escapeHtml(unsafe: string): string {
     .replace(/'/g, '&#039;');
 }
 
-export function extractCodeBlocks(content: string): { text: string, isCode: boolean }[] {
+export function extractCodeBlocks(content: string): { text: string, isCode: boolean, isMath?: boolean, isInlineMath?: boolean, language?: string }[] {
   const codeBlockRegex = /```(?:(\w+)\n)?([\s\S]*?)```/g;
-  const parts: { text: string, isCode: boolean, language?: string }[] = [];
+  const blockMathRegex = /\\\[([\s\S]*?)\\\]/g;
+  const inlineMathRegex = /\\\(([\s\S]*?)\\\)/g;
+  const parts: { text: string, isCode: boolean, isMath?: boolean, isInlineMath?: boolean, language?: string }[] = [];
   
+  // First, split by code blocks
   let lastIndex = 0;
   let match;
   
@@ -67,6 +70,98 @@ export function extractCodeBlocks(content: string): { text: string, isCode: bool
       isCode: false
     });
   }
+
+  // Now process math blocks in non-code parts
+  const result: typeof parts = [];
   
-  return parts;
+  for (const part of parts) {
+    if (part.isCode) {
+      result.push(part);
+      continue;
+    }
+    
+    // First process block math \[...\]
+    const text = part.text;
+    let blockMathLastIndex = 0;
+    let blockMathParts: typeof parts = [];
+    let blockMathMatch;
+    
+    while ((blockMathMatch = blockMathRegex.exec(text)) !== null) {
+      // Add text before the math block
+      if (blockMathMatch.index > blockMathLastIndex) {
+        blockMathParts.push({
+          text: text.substring(blockMathLastIndex, blockMathMatch.index),
+          isCode: false,
+          isMath: false
+        });
+      }
+      
+      // Add the math block
+      blockMathParts.push({
+        text: blockMathMatch[1],
+        isCode: false,
+        isMath: true
+      });
+      
+      blockMathLastIndex = blockMathMatch.index + blockMathMatch[0].length;
+    }
+    
+    // Add remaining text after the last block math
+    if (blockMathLastIndex < text.length) {
+      blockMathParts.push({
+        text: text.substring(blockMathLastIndex),
+        isCode: false,
+        isMath: false
+      });
+    } else if (blockMathLastIndex === 0) {
+      // If no block math was found, keep the original text
+      blockMathParts = [part];
+    }
+    
+    // Then process inline math \(...\) in each non-math part from the previous step
+    for (const blockMathPart of blockMathParts) {
+      if (blockMathPart.isMath) {
+        result.push(blockMathPart);
+        continue;
+      }
+      
+      const inlineText = blockMathPart.text;
+      let inlineMathLastIndex = 0;
+      let inlineMathMatch;
+      
+      while ((inlineMathMatch = inlineMathRegex.exec(inlineText)) !== null) {
+        // Add text before the inline math
+        if (inlineMathMatch.index > inlineMathLastIndex) {
+          result.push({
+            text: inlineText.substring(inlineMathLastIndex, inlineMathMatch.index),
+            isCode: false,
+            isMath: false
+          });
+        }
+        
+        // Add the inline math
+        result.push({
+          text: inlineMathMatch[1],
+          isCode: false,
+          isInlineMath: true
+        });
+        
+        inlineMathLastIndex = inlineMathMatch.index + inlineMathMatch[0].length;
+      }
+      
+      // Add remaining text after the last inline math
+      if (inlineMathLastIndex < inlineText.length) {
+        result.push({
+          text: inlineText.substring(inlineMathLastIndex),
+          isCode: false,
+          isMath: false
+        });
+      } else if (inlineMathLastIndex === 0) {
+        // If no inline math was found, add the original part
+        result.push(blockMathPart);
+      }
+    }
+  }
+  
+  return result;
 }
