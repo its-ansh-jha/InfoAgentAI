@@ -1,0 +1,41 @@
+REPLIT INTERFACE VISUAL GUIDE
+============================
+
++-------------------------------------------------------------+
+|                                                             |
+| Project Name (click for menu) ▼                [Run] [▷]    |
+|                                                             |
++-------------------------------------------------------------+
+|                  |                                          |
+|                  |                                          |
+|                  |                                          |
+|  FILES     ⋮     |                                          |
+|  (three dots)    |                                          |
+|                  |           EDITOR AREA                    |
+|  |- file1.js     |                                          |
+|  |- file2.js     |                                          |
+|  |- folder/      |                                          |
+|    |- subfile.js |                                          |
+|                  |                                          |
+|                  |                                          |
+|                  |                                          |
++-------------------------------------------------------------+
+
+DROPDOWN MENU WHEN YOU CLICK THE THREE DOTS (⋮):
++---------------------+
+| Create file         |
+| Create folder       |
+| Upload file         |
+| Download as zip   ← CLICK THIS OPTION TO DOWNLOAD
+| ...                 |
++---------------------+
+
+DROPDOWN MENU WHEN YOU CLICK THE PROJECT NAME:
++---------------------+
+| Fork project        |
+| Rename project      |
+| Download project  ← OR CLICK THIS OPTION TO DOWNLOAD
+| Share               |
+| Connect to GitHub   |
+| ...                 |
++---------------------+

@@ -1,0 +1,42 @@
+How to Download Your Replit Project as a ZIP File:
+
+OPTION 1: Using the Files Panel
+-------------------------------
+1. Look at the left side of your Replit interface where you see the file explorer/tree
+2. At the top of the Files panel, find the three dots menu (⋮) - it's usually next to 
+   the "Files" label or above the file list
+3. Click on these three dots to open a dropdown menu
+4. In this dropdown menu, you should see an option for "Download as zip"
+5. Click this option to download your entire project as a zip file
+
+OPTION 2: Using the Project Menu
+--------------------------------
+1. Look at the very top of your Replit window where you see your project name
+2. Click on your project name to open a dropdown menu
+3. In this menu, look for "Download project" or a similar download option
+4. Click this option to download the project
+
+OPTION 3: Export to GitHub then clone
+-------------------------------------
+1. Click on your project name at the top of Replit
+2. In the dropdown, look for "Connect to GitHub" or "Export to GitHub"
+3. Follow the steps to connect your Replit account to GitHub
+4. Create a new repository or select an existing one
+5. After the project is exported to GitHub, you can clone or download it from there
+
+If you still can't find the download option, try looking for a "Share" or "Export" option,
+which might contain the download functionality.
+
+ALTERNATIVE: Manual Copy Method (if all else fails)
+--------------------------------------------------
+1. Create a new empty folder on your computer
+2. For each file in your Replit project:
+   - Open the file in Replit
+   - Copy all content (Ctrl+A, Ctrl+C)
+   - Create a new file with the same name in your local folder
+   - Paste the content (Ctrl+V)
+   - Save the file
+3. This is tedious but will work for smaller projects
+
+Remember: Once you download the project, you'll need to set up the environment variables
+(OPENAI_API_KEY, DATABASE_URL, etc.) on the new hosting platform for the application to work.
