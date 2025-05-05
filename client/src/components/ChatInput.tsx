@@ -1,5 +1,5 @@
 import React, { useRef, useState, useEffect, ChangeEvent } from 'react';
-import { SendHorizonal, Mic, Globe, ImagePlus, ImageIcon, X } from 'lucide-react';
+import { Send, Globe, ImagePlus, Image, X, Search, Mic } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChat } from '@/context/ChatContext';
 import { autoResizeTextarea } from '@/utils/helpers';
@@ -11,11 +11,18 @@ import {
   TooltipTrigger 
 } from '@/components/ui/tooltip';
 import { Badge } from '@/components/ui/badge';
+import { VoiceInput } from '@/components/VoiceInput';
+import { performSearch } from '@/utils/search';
+import { SearchResults } from '@/components/SearchResults';
+import type { SearchResult } from '@/utils/search';
 
 export function ChatInput() {
   const [input, setInput] = useState('');
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imageName, setImageName] = useState<string>('');
+  const [isListening, setIsListening] = useState(false);
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { sendUserMessage, isLoading } = useChat();
@@ -150,7 +157,7 @@ export function ChatInput() {
                 variant="outline" 
                 className="bg-neutral-800 text-white border-neutral-700 py-1 pl-2 pr-1 flex items-center gap-1"
               >
-                <ImageIcon className="h-3 w-3 mr-1" />
+                <Image className="h-3 w-3 mr-1" />
                 <span className="truncate max-w-[150px]">{imageName}</span>
                 <Button
                   type="button"
@@ -225,7 +232,7 @@ export function ChatInput() {
                 disabled={isLoading || (!input.trim() && !imageFile)}
                 className="h-9 w-9 rounded-full bg-primary hover:bg-primary/90 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
-                <SendHorizonal className="h-5 w-5" />
+                <Send className="h-5 w-5" />
               </Button>
             </div>
           </div>
