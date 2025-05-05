@@ -1,14 +1,13 @@
-import React, { createContext, useState, useContext, useCallback } from 'react';
-import { Message, ModelType } from '@/types';
+import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
+import { Message } from '@/types';
 import { sendMessage } from '@/utils/api';
-import { getSystemMessage, getWelcomeMessage } from '@/utils/helpers';
+import { getSystemMessage } from '@/utils/helpers';
 import { useToast } from '@/hooks/use-toast';
+import { useChatHistory } from '@/context/ChatHistoryContext';
 
 interface ChatContextType {
   messages: Message[];
   isLoading: boolean;
-  model: ModelType;
-  setModel: (model: ModelType) => void;
   sendUserMessage: (content: string) => Promise<void>;
   clearMessages: () => void;
 }
@@ -16,16 +15,25 @@ interface ChatContextType {
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  // Only add welcome message to UI messages, keep system message separate
-  const [messages, setMessages] = useState<Message[]>([
-    getWelcomeMessage('GPT-4o-mini')
-  ]);
-  
-  // Store system message for API requests but don't display it
-  const systemMessage = getSystemMessage();
-  const [model, setModel] = useState<ModelType>('gpt-4o-mini');
+  const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  
+  // Get current chat from ChatHistoryContext
+  const { currentChat, updateCurrentChat, startNewChat } = useChatHistory();
+
+  // Update local messages when currentChat changes
+  useEffect(() => {
+    if (currentChat) {
+      setMessages(currentChat.messages);
+    } else {
+      // If no current chat, create a new one
+      startNewChat();
+    }
+  }, [currentChat, startNewChat]);
+
+  // Store system message for API requests but don't display it
+  const systemMessage = getSystemMessage();
 
   const sendUserMessage = useCallback(async (content: string) => {
     if (!content.trim()) return;
@@ -33,12 +41,14 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const userMessage: Message = {
       role: 'user',
       content,
-      model,
+      model: 'gpt-4o-mini',
       timestamp: new Date().toISOString(),
     };
 
     // Add user message to the chat
-    setMessages(prev => [...prev, userMessage]);
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    updateCurrentChat(updatedMessages);
     
     // Show loading state
     setIsLoading(true);
@@ -46,16 +56,17 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Get current messages at the time of sending, including system message for AI context
       const currentMessages = [systemMessage, ...messages, userMessage];
-      const aiResponse = await sendMessage(content, model, currentMessages);
+      const aiResponse = await sendMessage(content, 'gpt-4o-mini', currentMessages);
       
       // Add AI response to the chat
-      setMessages(prev => [
-        ...prev, 
-        {
-          ...aiResponse,
-          timestamp: new Date().toISOString()
-        }
-      ]);
+      const newMessage = {
+        ...aiResponse,
+        timestamp: new Date().toISOString()
+      };
+      
+      const finalMessages = [...updatedMessages, newMessage];
+      setMessages(finalMessages);
+      updateCurrentChat(finalMessages);
     } catch (error) {
       console.error('Failed to get AI response:', error);
       toast({
@@ -65,32 +76,30 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
       
       // Add error message
-      setMessages(prev => [
-        ...prev,
-        {
-          role: 'assistant',
-          content: 'I apologize, but I encountered an error processing your request. Please try again later.',
-          model,
-          timestamp: new Date().toISOString(),
-        }
-      ]);
+      const errorMessage = {
+        role: 'assistant' as const,
+        content: 'I apologize, but I encountered an error processing your request. Please try again later.',
+        model: 'gpt-4o-mini',
+        timestamp: new Date().toISOString(),
+      };
+      
+      const finalMessages = [...updatedMessages, errorMessage];
+      setMessages(finalMessages);
+      updateCurrentChat(finalMessages);
     } finally {
       setIsLoading(false);
     }
-  }, [model, toast]);
+  }, [messages, toast, updateCurrentChat, systemMessage]);
 
   const clearMessages = useCallback(() => {
-    setMessages([
-      getWelcomeMessage(model === 'gpt-4o-mini' ? 'GPT-4o-mini' : 'DeepSeek R1')
-    ]);
-  }, [model]);
+    // Create a new chat instead of clearing messages
+    startNewChat();
+  }, [startNewChat]);
 
   return (
     <ChatContext.Provider value={{ 
       messages, 
       isLoading, 
-      model, 
-      setModel, 
       sendUserMessage,
       clearMessages 
     }}>

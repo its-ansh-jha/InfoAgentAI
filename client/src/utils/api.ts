@@ -1,8 +1,8 @@
-import { Message, ModelType } from '@/types';
+import { Message } from '@/types';
 
 export async function sendMessage(
   content: string,
-  model: ModelType,
+  model: 'gpt-4o-mini',
   messages: Message[]
 ): Promise<Message> {
   try {

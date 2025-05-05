@@ -19,8 +19,8 @@ export const getSystemMessage = (): Message => ({
 
 export const getWelcomeMessage = (model: string): Message => ({
   role: 'assistant',
-  content: `👋 Hello! I'm InfoAgent, your advanced AI assistant built by Ansh Kumar Jha. I can help with Q&A, reasoning, code generation, and productivity tasks. You're currently using ${model}. How can I assist you today?`,
-  model: model.toLowerCase().includes('gpt') ? 'gpt-4o-mini' : 'deepseek-r1',
+  content: `👋 Hello! I'm InfoAgent, your advanced AI assistant built by Ansh Kumar Jha. I can help with Q&A, reasoning, code generation, and productivity tasks. How can I assist you today?`,
+  model: 'gpt-4o-mini',
   timestamp: new Date().toISOString(),
 });
 

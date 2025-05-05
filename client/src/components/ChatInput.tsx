@@ -7,7 +7,7 @@ import { autoResizeTextarea } from '@/utils/helpers';
 export function ChatInput() {
   const [input, setInput] = useState('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const { sendUserMessage, isLoading, model } = useChat();
+  const { sendUserMessage, isLoading } = useChat();
 
   // Auto-resize textarea on input
   useEffect(() => {
@@ -54,7 +54,7 @@ export function ChatInput() {
             <div className="absolute bottom-2 right-3 text-xs text-muted-foreground">
               <span>Using </span>
               <span className="font-medium text-primary">
-                {model === 'gpt-4o-mini' ? 'GPT-4o-mini' : 'DeepSeek R1'}
+                GPT-4o-mini
               </span>
             </div>
           </div>
