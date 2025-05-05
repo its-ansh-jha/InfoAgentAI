@@ -49,19 +49,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Log the response for debugging
       let previewContent = 'Complex content structure';
+      let formattedResponse;
       
-      if (response.content && typeof response.content === 'string') {
-        previewContent = response.content.substring(0, 50);
-      } else if (response.message && typeof response.message.content === 'string') {
-        previewContent = response.message.content.substring(0, 50);
+      // Handle different response formats with proper type checking
+      const hasRole = typeof response === 'object' && response !== null && 'role' in response;
+      const hasContent = typeof response === 'object' && response !== null && 'content' in response;
+      const hasMessage = typeof response === 'object' && response !== null && 'message' in response;
+      
+      if (hasRole && hasContent) {
+        // Direct format from Maverick service
+        const typedResponse = response as { role: string; content: any; model?: string };
+        
+        if (typeof typedResponse.content === 'string') {
+          previewContent = typedResponse.content.substring(0, 50);
+        }
+        
+        formattedResponse = {
+          message: {
+            role: typedResponse.role,
+            content: typedResponse.content
+          },
+          model: typedResponse.model || chatRequest.model
+        };
+      } else if (hasMessage) {
+        // Already in message format
+        const typedResponse = response as { message: { role: string; content: string }; model: string };
+        formattedResponse = typedResponse;
+        
+        if (typeof typedResponse.message.content === 'string') {
+          previewContent = typedResponse.message.content.substring(0, 50);
+        }
+      } else {
+        // Unknown format, try to adapt
+        formattedResponse = {
+          message: {
+            role: 'assistant',
+            content: JSON.stringify(response)
+          },
+          model: chatRequest.model
+        };
       }
       
       log(`Model ${chatRequest.model} response: ${previewContent}...`);
       
-      // Return the response with compatibility for message format
-      return res.status(200).json({
-        message: response
-      });
+      // Return the standardized response
+      return res.status(200).json(formattedResponse);
     } catch (error: any) {
       log(`Error in chat endpoint: ${error.message}`, "error");
       return res.status(500).json({ message: error.message || "Something went wrong" });

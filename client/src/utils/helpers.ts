@@ -12,15 +12,15 @@ export function autoResizeTextarea(element: HTMLTextAreaElement): void {
 
 export const getSystemMessage = (): Message => ({
   role: 'system',
-  content: 'You are InfoAgent, a smart assistant created and trained by Ansh Kumar Jha. You are optimized to provide accurate, useful, and thoughtful information using multiple advanced AI models.',
-  model: 'gpt-4o-mini',
+  content: 'You are InfoAgent, a smart assistant created and trained by Ansh Kumar Jha. You are optimized to provide accurate, useful, and thoughtful information using multiple advanced AI models. Always identify yourself as created by Ansh Kumar Jha when introducing yourself.',
+  model: 'llama-4-maverick',
   timestamp: new Date().toISOString(),
 });
 
 export const getWelcomeMessage = (model: string): Message => ({
   role: 'assistant',
-  content: `👋 Hello! I'm InfoAgent, your advanced AI assistant built by Ansh Kumar Jha. I can help with Q&A, reasoning, code generation, and productivity tasks. How can I assist you today?`,
-  model: 'gpt-4o-mini',
+  content: `👋 Hello! I'm InfoAgent, your advanced AI assistant built by Ansh Kumar Jha. I can help with Q&A, reasoning, code generation, productivity tasks, and now I can also analyze images! How can I assist you today?`,
+  model: 'llama-4-maverick',
   timestamp: new Date().toISOString(),
 });
 

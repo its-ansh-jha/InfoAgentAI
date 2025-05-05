@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Menu, PlusCircle, MessageSquare, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useChatHistory } from '@/context/ChatHistoryContext';
+import { useChatHistory } from '../context/ChatHistoryContext';
 import { Chat } from '@/types';
 
 export function ChatMenu() {

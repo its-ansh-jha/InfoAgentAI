@@ -132,6 +132,37 @@ export function ChatInput() {
     <footer className="sticky bottom-0 py-4 bg-neutral-900">
       <div className="container mx-auto px-4">
         <form onSubmit={handleSubmit} className="max-w-3xl mx-auto">
+          {/* Hidden file input for image upload */}
+          <input 
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            accept="image/*"
+            className="hidden"
+          />
+          
+          {/* Image preview (if uploaded) */}
+          {imageFile && (
+            <div className="mb-2 flex items-center">
+              <Badge 
+                variant="outline" 
+                className="bg-neutral-800 text-white border-neutral-700 py-1 pl-2 pr-1 flex items-center gap-1"
+              >
+                <ImageIcon className="h-3 w-3 mr-1" />
+                <span className="truncate max-w-[150px]">{imageName}</span>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  onClick={removeImage}
+                  className="h-4 w-4 rounded-full hover:bg-neutral-700 p-0 ml-1"
+                >
+                  <X className="h-3 w-3" />
+                </Button>
+              </Badge>
+            </div>
+          )}
+          
           <div className="relative flex items-center bg-neutral-800 rounded-full border border-neutral-700 overflow-hidden">
             <div className="flex items-center pl-3 space-x-1">
               <TooltipProvider>
@@ -142,7 +173,9 @@ export function ChatInput() {
                       variant="ghost"
                       size="icon"
                       onClick={handleImageUpload}
-                      className="h-9 w-9 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-700"
+                      className={`h-9 w-9 rounded-full hover:bg-neutral-700 ${
+                        imageFile ? 'text-primary hover:text-primary' : 'text-neutral-400 hover:text-white'
+                      }`}
                     >
                       <ImagePlus className="h-5 w-5" />
                     </Button>
@@ -160,7 +193,7 @@ export function ChatInput() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               rows={1}
-              placeholder="Ask anything..."
+              placeholder={imageFile ? "Ask about this image..." : "Ask anything..."}
               className="flex-1 py-3 px-3 bg-transparent border-none focus:outline-none focus:ring-0 resize-none text-white placeholder-neutral-500 min-h-[44px] max-h-[200px]"
               disabled={isLoading}
             />
@@ -187,7 +220,7 @@ export function ChatInput() {
               
               <Button
                 type="submit"
-                disabled={isLoading || !input.trim()}
+                disabled={isLoading || (!input.trim() && !imageFile)}
                 className="h-9 w-9 rounded-full bg-primary hover:bg-primary/90 text-white shadow-md disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               >
                 <SendHorizonal className="h-5 w-5" />
@@ -196,7 +229,7 @@ export function ChatInput() {
           </div>
           
           <div className="text-center mt-1 text-xs text-neutral-500">
-            InfoAgent is using GPT-4o-mini to generate human-like text
+            InfoAgent is using Llama-4-Maverick to generate human-like text
           </div>
         </form>
       </div>
