@@ -7,12 +7,12 @@ import {
   ThumbsDown, 
   Copy, 
   RefreshCw, 
-  Volume2,
   Check
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CodeBlock } from '@/components/CodeBlock';
 import { MathDisplay } from '@/components/MathDisplay';
+import { TextToSpeech } from '@/components/TextToSpeech';
 import { extractCodeBlocks } from '@/utils/helpers';
 import { useToast } from '@/hooks/use-toast';
 import { useChat } from '@/context/ChatContext';
@@ -81,7 +81,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
     setTimeout(() => setCopied(false), 2000);
   };
 
-  const textToSpeech = () => {
+  // We'll use our improved TextToSpeech component instead of this function
+  const getCleanTextForSpeech = () => {
     // Extract only the text content for speech
     const textContent = contentParts
       .filter(part => !part.isCode && !part.isMath && !part.isInlineMath)
@@ -89,7 +90,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
       .join(' ');
     
     // Clean up text for better speech synthesis
-    const cleanedText = textContent
+    return textContent
       // Replace common emoji patterns with spaces to prevent reading emoji codes
       .replace(/:[a-z_]+:/g, ' ')
       // Remove special characters and brackets that might be read literally
@@ -97,27 +98,6 @@ export function ChatMessage({ message }: ChatMessageProps) {
       // Normalize whitespace
       .replace(/\s+/g, ' ')
       .trim();
-    
-    if ('speechSynthesis' in window) {
-      // Stop any ongoing speech
-      window.speechSynthesis.cancel();
-      
-      const utterance = new SpeechSynthesisUtterance(cleanedText);
-      window.speechSynthesis.speak(utterance);
-      
-      toast({
-        title: "Text-to-Speech",
-        description: "Reading message aloud",
-        duration: 2000,
-      });
-    } else {
-      toast({
-        title: "Error",
-        description: "Text-to-speech is not supported in your browser",
-        variant: "destructive",
-        duration: 3000,
-      });
-    }
   };
 
   // Get all we need from context at component level
@@ -275,23 +255,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
                 </Tooltip>
               </TooltipProvider>
               
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      size="icon" 
-                      onClick={textToSpeech}
-                      className="h-8 w-8 rounded-full text-neutral-400 hover:text-white hover:bg-neutral-800"
-                    >
-                      <Volume2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom">
-                    <p>Read aloud</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              {/* Text to Speech component */}
+              <TextToSpeech text={getCleanTextForSpeech()} />
               
               <TooltipProvider>
                 <Tooltip>
