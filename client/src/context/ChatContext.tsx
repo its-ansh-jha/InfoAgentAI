@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useCallback, useEffect } from 'react';
 import { Message } from '@/types';
-import { sendMessage } from '@/utils/api';
+import { sendMessage, sendMessageWithImage, uploadImage } from '@/utils/api';
 import { getSystemMessage } from '@/utils/helpers';
 import { useToast } from '@/hooks/use-toast';
 import { useChatHistory } from '@/context/ChatHistoryContext';
@@ -8,7 +8,7 @@ import { useChatHistory } from '@/context/ChatHistoryContext';
 interface ChatContextType {
   messages: Message[];
   isLoading: boolean;
-  sendUserMessage: (content: string) => Promise<void>;
+  sendUserMessage: (content: string, imageFile?: File | null) => Promise<void>;
   clearMessages: () => void;
 }
 
@@ -35,13 +35,39 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
   // Store system message for API requests but don't display it
   const systemMessage = getSystemMessage();
 
-  const sendUserMessage = useCallback(async (content: string) => {
-    if (!content.trim()) return;
+  const sendUserMessage = useCallback(async (content: string, imageFile?: File | null) => {
+    if (!content.trim() && !imageFile) return;
+
+    // Process any uploaded image file
+    let imageData: string | null = null;
+    if (imageFile) {
+      try {
+        // Get base64 representation of the image
+        imageData = await uploadImage(imageFile);
+        console.log('Image uploaded successfully');
+      } catch (error) {
+        console.error('Failed to process image:', error);
+        toast({
+          title: 'Image Upload Error',
+          description: 'Failed to process the image. Please try again.',
+          variant: 'destructive',
+        });
+        return;
+      }
+    }
+
+    // Create the message content based on whether there's an image
+    let messageContent: string | Array<{type: string, text?: string, image_data?: string}> = content;
+    
+    if (imageFile && imageData) {
+      // Store a text representation in the UI for the user's message
+      messageContent = `[Image attached] ${content}`;
+    }
 
     const userMessage: Message = {
       role: 'user',
-      content,
-      model: 'gpt-4o-mini',
+      content: messageContent,
+      model: 'llama-4-maverick',
       timestamp: new Date().toISOString(),
     };
 
@@ -56,7 +82,25 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       // Get current messages at the time of sending, including system message for AI context
       const currentMessages = [systemMessage, ...messages, userMessage];
-      const aiResponse = await sendMessage(content, 'gpt-4o-mini', currentMessages);
+      
+      let aiResponse;
+      
+      if (imageFile && imageData) {
+        // Use the image-enabled API call
+        aiResponse = await sendMessageWithImage(
+          content, 
+          imageData, 
+          'llama-4-maverick', 
+          currentMessages
+        );
+      } else {
+        // Use regular text API call
+        aiResponse = await sendMessage(
+          content, 
+          'llama-4-maverick', 
+          currentMessages
+        );
+      }
       
       // Add AI response to the chat
       const newMessage: Message = {
@@ -79,7 +123,7 @@ export const ChatProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const errorMessage: Message = {
         role: 'assistant',
         content: 'I apologize, but I encountered an error processing your request. Please try again later.',
-        model: 'gpt-4o-mini',
+        model: 'llama-4-maverick',
         timestamp: new Date().toISOString(),
       };
       

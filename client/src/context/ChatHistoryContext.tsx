@@ -87,15 +87,31 @@ export const ChatHistoryProvider: React.FC<{ children: React.ReactNode }> = ({ c
           if (title === 'New Conversation' && messages.length >= 3) {
             const firstUserMessage = messages.find(m => m.role === 'user');
             if (firstUserMessage) {
-              // Use the first 5-10 words for the title
-              title = firstUserMessage.content
-                .split(' ')
-                .slice(0, Math.min(8, firstUserMessage.content.split(' ').length))
-                .join(' ');
+              // Extract text from potentially complex content
+              let messageText = '';
+              
+              if (typeof firstUserMessage.content === 'string') {
+                messageText = firstUserMessage.content;
+              } else if (Array.isArray(firstUserMessage.content)) {
+                // Extract text from multimodal content
+                messageText = firstUserMessage.content
+                  .filter(item => item.type === 'text' && item.text)
+                  .map(item => item.text)
+                  .join(' ');
+              }
+              
+              // Use the first few words for the title
+              const words = messageText.split(' ');
+              title = words.slice(0, Math.min(8, words.length)).join(' ');
               
               // Add ellipsis if the content was truncated
-              if (firstUserMessage.content.split(' ').length > 8) {
+              if (words.length > 8) {
                 title += '...';
+              }
+              
+              // If no text content was found or the title is empty, use a default
+              if (!title || title.trim() === '') {
+                title = 'Image Conversation';
               }
             }
           }

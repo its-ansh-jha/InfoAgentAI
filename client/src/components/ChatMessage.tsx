@@ -37,8 +37,29 @@ export function ChatMessage({ message }: ChatMessageProps) {
     return null;
   }
   
+  // Handle both string and array formats of content
+  let contentString: string;
+  
+  if (typeof content === 'string') {
+    contentString = content;
+  } else if (Array.isArray(content)) {
+    // Convert array content to displayable string
+    contentString = content
+      .map(item => {
+        if (item.type === 'text' && item.text) {
+          return item.text;
+        } else if (item.type === 'image') {
+          return '[Attached image]';
+        }
+        return '';
+      })
+      .join('\n');
+  } else {
+    contentString = 'Content could not be displayed';
+  }
+  
   // Split content into text, code blocks, and math blocks
-  const contentParts = extractCodeBlocks(content);
+  const contentParts = extractCodeBlocks(contentString);
 
   const copyToClipboard = () => {
     // Only copy text portions, not code blocks

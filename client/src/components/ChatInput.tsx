@@ -1,5 +1,5 @@
-import React, { useRef, useState, useEffect } from 'react';
-import { SendHorizonal, Mic, Globe, ImagePlus } from 'lucide-react';
+import React, { useRef, useState, useEffect, ChangeEvent } from 'react';
+import { SendHorizonal, Mic, Globe, ImagePlus, ImageIcon, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useChat } from '@/context/ChatContext';
 import { autoResizeTextarea } from '@/utils/helpers';
@@ -10,10 +10,14 @@ import {
   TooltipProvider, 
   TooltipTrigger 
 } from '@/components/ui/tooltip';
+import { Badge } from '@/components/ui/badge';
 
 export function ChatInput() {
   const [input, setInput] = useState('');
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imageName, setImageName] = useState<string>('');
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { sendUserMessage, isLoading } = useChat();
   const { toast } = useToast();
 
@@ -26,10 +30,17 @@ export function ChatInput() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    
+    // Must have either text or an image to submit
+    if ((!input.trim() && !imageFile) || isLoading) return;
 
-    await sendUserMessage(input);
+    // Send the message with optional image
+    await sendUserMessage(input, imageFile);
+    
+    // Reset state
     setInput('');
+    setImageFile(null);
+    setImageName('');
     
     // Reset textarea height
     if (textareaRef.current) {
@@ -62,11 +73,59 @@ export function ChatInput() {
   };
   
   const handleImageUpload = () => {
-    toast({
-      title: "Image upload",
-      description: "Image upload feature coming soon!",
-      duration: 2000,
-    });
+    // Trigger the hidden file input
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+  
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    
+    if (files && files.length > 0) {
+      const file = files[0];
+      
+      // Check if the file is an image
+      if (!file.type.startsWith('image/')) {
+        toast({
+          title: "Error",
+          description: "Please select an image file (JPEG, PNG, etc.)",
+          variant: "destructive",
+          duration: 3000,
+        });
+        return;
+      }
+      
+      // Check file size (limit to 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        toast({
+          title: "Error",
+          description: "Image file is too large (maximum: 5MB)",
+          variant: "destructive",
+          duration: 3000,
+        });
+        return;
+      }
+      
+      setImageFile(file);
+      setImageName(file.name);
+      
+      toast({
+        title: "Image added",
+        description: `Image "${file.name}" added to your message`,
+        duration: 2000,
+      });
+    }
+  };
+  
+  const removeImage = () => {
+    setImageFile(null);
+    setImageName('');
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   return (
